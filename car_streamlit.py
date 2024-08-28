@@ -39,18 +39,25 @@ def load_data():
     df['price'] = df['price'].apply(convert_price)
 
     # Clean and preprocess other columns
+    # Extract numeric values from the 'Mileage' column and convert them to float
     df['Mileage'] = df['Mileage'].str.extract(r'(\d+\.?\d*)').astype(float)
+    # Fill missing values in the 'Mileage' column with the mean mileage
     df['Mileage'] = df['Mileage'].fillna(df['Mileage'].mean())
-
+    # Extract numeric values from the 'Max Power' column and convert them to float
     df['Max Power'] = df['Max Power'].str.extract(r'(\d+\.?\d*)')[0].astype(float).fillna(
+        # Fill missing values with the mode (most frequent value) of 'Max Power'
         df['Max Power'].str.extract(r'(\d+\.?\d*)')[0].mode()[0]
     )
-
+    # Clean and convert 'Kms Driven' column to integer
     df['Kms Driven'] = df['Kms Driven'].str.replace(',', '').str.replace('Kms', '').fillna(0).astype(int)
+    # Clean and convert 'Engine' column to integer
     df['Engine'] = df['Engine'].str.replace(',', '').str.replace('CC', '').fillna(0).astype(int)
+    # Remove 'R' from 'Wheel Size' column and fill missing values with the mode
     df['Wheel Size'] = df['Wheel Size'].str.replace('R', '').fillna(df['Wheel Size'].mode()[0])
+    # Clean and convert 'Seats' column to integer
     df['Seats'] = df['Seats'].str.replace('Seats', '').str.strip()
     df['Seats'] = df['Seats'].fillna(df['Seats'].mode()[0]).astype(int)
+    # Fill missing values in 'Ownership' column with the mode
     df['Ownership'] = df['Ownership'].fillna(df['Ownership'].mode()[0])
 
     # One-hot encode categorical variables
@@ -63,7 +70,7 @@ def load_data():
 
  #Load the trained model
 def load_model():
-    with open('random_forest.pkl', mode='rb') as file:
+    with open('random_forest_best_model.pkl', mode='rb+') as file:
         model = pickle.load(file)
     return model
 
@@ -126,6 +133,7 @@ def main():
         'Maruti', 'Hyundai', 'Honda', 'Toyota', 'Ford', 'BMW', 'Mercedes', 'Audi'
     ])
     Insurance_Validity = st.sidebar.selectbox('Insurance Validity', options=['Yes', 'No'])
+    car_age=st.sidebar.number_input('car age',min_value=0)
     City = st.sidebar.selectbox('City Name', options=['Delhi', 'Mumbai', 'Bangalore', 'Chennai', 'Kolkata', 'Jaipur'])
 
     # Input data for prediction
@@ -142,7 +150,8 @@ def main():
         'transmission': transmission,
         'oem': oem,
         'Insurance Validity': Insurance_Validity,
-        'City': City
+        'City': City,
+        'car age':car_age
     }
 
     # Preprocess input data
